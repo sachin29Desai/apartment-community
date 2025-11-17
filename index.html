@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apartment Community App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom styles for layout and transitions */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f3f4f6;
+        }
+        .nav-item {
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 0;
+            color: #6b7280; /* text-gray-500 */
+        }
+        .nav-item.active {
+            color: #4f46e5; /* indigo-600 */
+        }
+        .nav-item.active svg {
+            color: #4f46e5;
+        }
+        .page {
+            min-height: calc(100vh - 80px); /* Full height minus footer/nav */
+            display: none;
+            padding-bottom: 80px;
+        }
+        .page.active {
+            display: block;
+        }
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+        }
+        /* Mobile-first layout adjustments */
+        @media (min-width: 768px) {
+            .container-wrapper {
+                max-width: 420px;
+            }
+            .page {
+                min-height: 100vh;
+                padding-bottom: 20px;
+            }
+        }
+        /* Style for the chat box */
+        #chat-messages {
+            height: calc(100vh - 240px); /* Adjust based on header/footer size */
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding-right: 8px; /* For scrollbar spacing */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flex justify-center container-wrapper mx-auto">
+        <div class="w-full bg-white shadow-xl min-h-screen">
+
+            <!-- Header -->
+            <header class="p-4 border-b bg-white sticky top-0 z-10 flex justify-between items-center">
+                <h1 class="text-xl font-bold text-indigo-600">Community Hub</h1>
+                <div class="flex items-center space-x-3">
+                    <button class="text-gray-600 hover:text-red-500 p-2 rounded-full bg-red-100" onclick="handleQuickHelp()">
+                        <i data-lucide="bell-ring" class="menu-icon text-red-600"></i>
+                    </button>
+                    <button id="login-button" class="bg-indigo-500 text-white text-sm px-3 py-1 rounded-full font-medium shadow-md" onclick="toggleModal('modal-login')">
+                        Login
+                    </button>
+                    <button id="logout-button" class="bg-red-500 text-white text-sm px-3 py-1 rounded-full font-medium shadow-md hidden" onclick="handleLogout()">
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="p-4 md:p-6 pb-20">
+
+                <!-- Global Loader (simulated) -->
+                <div id="global-loader" class="text-center py-4 hidden">
+                    <i data-lucide="loader-circle" class="menu-icon animate-spin text-indigo-500 mx-auto"></i>
+                    <p class="text-sm text-gray-500 mt-1">Loading...</p>
+                </div>
+
+                <!-- Page: Home (Active by default) -->
+                <div id="page-home" class="page active space-y-4">
+                    <h2 class="text-2xl font-semibold">Welcome Home!</h2>
+                    
+                    <!-- Announcement Banner -->
+                    <div class="bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700 p-4 rounded-lg shadow-md" role="alert">
+                        <p class="font-bold">Important Notice</p>
+                        <p class="text-sm">The water supply maintenance is scheduled for tomorrow from 10 AM to 1 PM.</p>
+                    </div>
+
+                    <!-- WhatsApp Quick Connect -->
+                    <a href="https://wa.me/919876543210?text=Hello%2C%20I%20have%20a%20question%20about%20the%20community%20app%20or%20a%20maintenance%20issue." 
+                       target="_blank" 
+                       class="w-full flex items-center justify-center p-3 bg-green-500 text-white rounded-xl font-medium shadow-md hover:bg-green-600 transition">
+                        <i data-lucide="message-circle-code" class="menu-icon w-5 h-5 mr-2"></i> Chat with Admin on WhatsApp
+                    </a>
+
+                    <!-- Quick Actions -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <button class="p-3 bg-blue-100 rounded-xl flex flex-col items-center shadow-sm hover:bg-blue-200" onclick="showPage('payments')">
+                            <i data-lucide="wallet" class="menu-icon text-blue-600"></i>
+                            <span class="text-xs font-medium mt-1">Pay Bills</span>
+                        </button>
+                        <button class="p-3 bg-green-100 rounded-xl flex flex-col items-center shadow-sm hover:bg-green-200" onclick="showPage('forum')">
+                            <i data-lucide="message-square" class="menu-icon text-green-600"></i>
+                            <span class="text-xs font-medium mt-1">Forum</span>
+                        </button>
+                        <button class="p-3 bg-yellow-100 rounded-xl flex flex-col items-center shadow-sm hover:bg-yellow-200" onclick="showPage('pets')">
+                            <i data-lucide="paw-print" class="menu-icon text-yellow-600"></i>
+                            <span class="text-xs font-medium mt-1">Pet Corner</span>
+                        </button>
+                    </div>
+
+                    <!-- Upcoming Events Snapshot -->
+                    <h3 class="text-xl font-semibold pt-2">Upcoming Events</h3>
+                    <div id="home-events-list" class="space-y-3">
+                        <!-- Upcoming events will be rendered here by JS -->
+                    </div>
+                </div>
+
+                <!-- Page: Events -->
+                <div id="page-events" class="page space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-semibold">Community Events</h2>
+                        <button class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow hover:bg-indigo-700" onclick="handleSuggestEvent()">
+                            Suggest Event
+                        </button>
+                    </div>
+                    <div id="events-list" class="space-y-4">
+                        <!-- Events will be rendered here by JS -->
+                    </div>
+                </div>
+
+                <!-- Page: Forum -->
+                <div id="page-forum" class="page space-y-4">
+                    <h2 class="text-2xl font-semibold">Community Forum</h2>
+
+                    <!-- New Post Input -->
+                    <div class="bg-white p-4 rounded-xl shadow-md border border-gray-200">
+                        <textarea id="forum-post-input" class="w-full border-gray-300 rounded-md p-2 resize-none focus:ring-indigo-500 focus:border-indigo-500" rows="3" placeholder="Share a notice, ask a question, or start a discussion..."></textarea>
+                        <button class="mt-2 w-full bg-indigo-600 text-white py-2 rounded-lg font-medium shadow hover:bg-indigo-700" onclick="handleNewPost()">
+                            Post to Forum
+                        </button>
+                    </div>
+
+                    <!-- Forum Posts List -->
+                    <div id="forum-posts-list" class="space-y-3">
+                        <!-- Posts will be rendered here by JS -->
+                    </div>
+                </div>
+                
+                <!-- Page: Gallery -->
+                <div id="page-gallery" class="page space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-semibold">Photo & Video Gallery</h2>
+                        <button class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow hover:bg-indigo-700" onclick="handleOpenAddMediaModal()">
+                            + Add Media
+                        </button>
+                    </div>
+                    <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <!-- Gallery images will be rendered here by JS -->
+                    </div>
+                </div>
+
+                <!-- Page: Pets -->
+                <div id="page-pets" class="page space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-semibold">Pet Corner</h2>
+                        <button class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow hover:bg-indigo-700" onclick="handleOpenAddPetModal()">
+                            + Add Your Pet
+                        </button>
+                    </div>
+
+                    <!-- Lost & Found Alert -->
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 rounded-md" role="alert">
+                        <p class="font-bold">Pet Alert: Missing Dog!</p>
+                        <p>Milo, a golden retriever, was last seen near Block C. Please contact 98XXXX1234 if found.</p>
+                    </div>
+
+                    <button class="w-full bg-blue-600 text-white py-2 rounded-lg font-medium shadow hover:bg-blue-700" onclick="toggleModal('modal-pet-care')">
+                        Request a Pet Caretaker
+                    </button>
+
+                    <!-- Pet Health & Services -->
+                    <h3 class="text-lg font-semibold">Pet Health & Services</h3>
+                    <div class="bg-gray-50 p-3 rounded-lg space-y-2">
+                        <p class="font-medium">Local Services:</p>
+                        <ul class="list-disc list-inside text-sm text-gray-700">
+                            <li>Happy Paws Grooming - 10% off for residents</li>
+                            <li>Dr. Bones Vet Clinic - 24/7 Emergency (<a href="#" class="text-indigo-600">Call Now</a>)</li>
+                        </ul>
+                        <button class="w-full text-sm bg-gray-200 text-gray-800 py-1.5 rounded-lg hover:bg-gray-300" onclick="handleViewVaccinations()">
+                            View Pet Vaccination Chart (Demo)
+                        </button>
+                    </div>
+                    
+                    <!-- Pet Care Requests -->
+                    <h3 class="text-lg font-semibold">Caretaker Requests</h3>
+                    <div id="pet-care-requests-list" class="space-y-3">
+                        <!-- Pet care requests will be rendered here by JS -->
+                    </div>
+
+                    <!-- Pet Profiles -->
+                    <h3 class="text-lg font-semibold">Pet Profiles</h3>
+                    <div id="pet-profiles-list" class="space-y-4">
+                        <!-- Pet profiles will be rendered here by JS -->
+                    </div>
+
+                    <!-- Pet Gallery -->
+                    <h3 class="text-lg font-semibold">Pet Gallery</h3>
+                    <div id="pet-gallery-grid" class="grid grid-cols-3 gap-2">
+                        <!-- Pet gallery images will be rendered here by JS -->
+                    </div>
+                </div>
+
+
+                <!-- Page: Environment/Green Initiatives -->
+                <div id="page-green" class="page space-y-4">
+                    <h2 class="text-2xl font-semibold">Green Initiatives</h2>
+                    <p class="text-gray-600">Track and improve our community's sustainability.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-lime-50 rounded-lg shadow-sm border border-lime-200">
+                            <i data-lucide="leaf" class="menu-icon text-lime-600 mb-2"></i>
+                            <h4 class="font-semibold">Water Savings</h4>
+                            <p class="text-2xl font-bold text-lime-800">15%</p>
+                            <p class="text-xs text-gray-500">vs. last month</p>
+                        </div>
+                        <div class="p-4 bg-teal-50 rounded-lg shadow-sm border border-teal-200">
+                            <i data-lucide="recycle" class="menu-icon text-teal-600 mb-2"></i>
+                            <h4 class="font-semibold">Recycling Rate</h4>
+                            <p class="text-2xl font-bold text-teal-800">85 kg</p>
+                            <p class="text-xs text-gray-500">this week</p>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-gray-200 text-gray-800 py-2 rounded-lg font-medium shadow hover:bg-gray-300" onclick="handleAISuggestion()">
+                        Get Sustainability Tips (AI)
+                    </button>
+                    
+                    <!-- AI Tip Container -->
+                    <div id="ai-tips-container" class="bg-white p-4 rounded-xl shadow border border-gray-200 hidden">
+                        <h4 class="font-semibold text-indigo-600 flex items-center mb-2">
+                            <i data-lucide="sparkles" class="menu-icon w-4 h-4 mr-2"></i> AI Green Tip
+                        </h4>
+                        <p id="ai-tips-content" class="text-gray-700 text-sm italic">
+                            <!-- Tip will be loaded here -->
+                        </p>
+                    </div>
+
+                    <!-- WhatsApp Integration for Green Groups -->
+                    <h3 class="text-lg font-semibold mt-4">Join Our Groups</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <a href="https://wa.me/919876543210?text=I%20want%20to%20join%20the%20Green%20Volunteers%20Group!" 
+                           target="_blank" 
+                           class="w-full flex items-center justify-center p-3 bg-green-500 text-white rounded-xl font-medium shadow-md hover:bg-green-600 transition">
+                            <i data-lucide="message-circle-code" class="menu-icon w-5 h-5 mr-2"></i> Green Volunteer Group
+                        </a>
+                        <a href="https://wa.me/919876543210?text=I%20am%20interested%20in%20the%20Community%20Sports%20Group." 
+                           target="_blank" 
+                           class="w-full flex items-center justify-center p-3 bg-blue-500 text-white rounded-xl font-medium shadow-md hover:bg-blue-600 transition">
+                            <i data-lucide="message-circle-code" class="menu-icon w-5 h-5 mr-2"></i> Sports Team Chat
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Page: Payments -->
+                <div id="page-payments" class="page space-y-4">
+                    <h2 class="text-2xl font-semibold">Payments & Subscriptions</h2>
+                    
+                    <h3 class="text-lg font-semibold">Your Subscriptions</h3>
+                    <div id="subscriptions-list" class="space-y-3">
+                        <!-- Subscriptions will be rendered here by JS -->
+                    </div>
+
+                    <h3 class="text-lg font-semibold mt-4">One-Time Payments</h3>
+                    <div class="space-y-3">
+                        <div class="p-4 bg-white rounded-lg shadow border border-gray-200">
+                            <p class="text-gray-600">Donate to Green Drive</p>
+                            <input id="donate-amount" type="number" class="w-full border-gray-300 rounded-md p-2 mt-1" placeholder="Enter amount">
+                            <button class="mt-2 w-full bg-blue-600 text-white py-2 rounded-lg font-medium shadow hover:bg-blue-700" onclick="handlePaymentClick('donate', 'Donation', 0)">
+                                Donate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page: Chat (NEW) -->
+                <div id="page-chat" class="page">
+                    <h2 class="text-2xl font-semibold mb-4">Community Chat</h2>
+                    
+                    <!-- Chat Messages Display Area -->
+                    <div id="chat-messages" class="bg-gray-50 p-4 rounded-xl shadow-inner mb-4">
+                        <!-- Messages will be rendered here by JS -->
+                    </div>
+                    
+                    <!-- Chat Input -->
+                    <div class="flex">
+                        <input type="text" id="chat-input" class="flex-1 border-gray-300 rounded-l-lg p-3 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Type a message...">
+                        <button class="bg-indigo-600 text-white px-4 py-3 rounded-r-lg font-medium shadow hover:bg-indigo-700 disabled:opacity-50" onclick="handleSendMessage()">
+                            <i data-lucide="send" class="menu-icon w-5 h-5"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">Note: This is a simulated multi-user chat. Messages are not persistent beyond this session.</p>
+                </div>
+                
+                <!-- Page: Profile (New) -->
+                <div id="page-profile" class="page space-y-6">
+                    <h2 class="text-2xl font-semibold">My Profile</h2>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <div class="flex items-center space-x-4 mb-4 pb-4 border-b">
+                            <i data-lucide="user-circle-2" class="menu-icon w-16 h-16 text-indigo-400"></i>
+                            <div>
+                                <h3 id="profile-display-name" class="text-xl font-bold text-gray-800">Guest User</h3>
+                                <p id="profile-display-unit" class="text-sm text-indigo-600 font-medium"></p>
+                                <p id="profile-display-role" class="text-xs text-gray-500 italic"></p>
+                            </div>
+                        </div>
+
+                        <form id="profile-form" class="space-y-4">
+                            <div>
+                                <label for="profile-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                                <input type="text" id="profile-name" class="mt-1 w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="Enter your full name">
+                            </div>
+                            <div>
+                                <label for="profile-unit" class="block text-sm font-medium text-gray-700">Apartment Unit</label>
+                                <input type="text" id="profile-unit" class="mt-1 w-full border-gray-300 rounded-md p-2 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., A-101">
+                            </div>
+                            <div>
+                                <label for="profile-phone" class="block text-sm font-medium text-gray-700">Phone Number (Login ID)</label>
+                                <input type="tel" id="profile-phone" class="mt-1 w-full border-gray-300 rounded-md p-2 shadow-sm bg-gray-100 cursor-not-allowed" readonly>
+                            </div>
+
+                            <button type="button" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium shadow hover:bg-indigo-700 transition" onclick="handleUpdateProfile()">
+                                Update Profile
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Admin Dashboard (NEW) - Hidden by default -->
+                    <div id="admin-dashboard" class="bg-red-50 p-6 rounded-xl shadow-md border border-red-300 hidden">
+                        <h3 class="text-xl font-bold text-red-700 mb-4 flex items-center">
+                            <i data-lucide="shield-check" class="menu-icon w-6 h-6 mr-2"></i> Admin Dashboard
+                        </h3>
+                        <div id="admin-metrics" class="grid grid-cols-2 gap-4">
+                            <!-- Metrics rendered by JS -->
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-red-200">
+                             <button class="w-full bg-red-600 text-white py-2 rounded-lg font-medium hover:bg-red-700" onclick="showPage('events')">
+                                 Review Pending Events
+                             </button>
+                        </div>
+                    </div>
+
+                    <button class="w-full text-red-600 bg-red-100 py-2 rounded-lg font-medium shadow hover:bg-red-200" onclick="handleLogout()">
+                        Log Out
+                    </button>
+
+                </div>
+            </main>
+
+            <!-- Footer Navigation -->
+            <footer class="fixed bottom-0 w-full max-w-sm mx-auto bg-white border-t shadow-2xl z-20 md:relative md:max-w-full">
+                <div class="flex justify-around">
+                    <div class="nav-item active" onclick="showPage('home')">
+                        <i data-lucide="home" class="menu-icon"></i>
+                        <span class="text-xs">Home</span>
+                    </div>
+                    <div class="nav-item" onclick="showPage('events')">
+                        <i data-lucide="calendar-check" class="menu-icon"></i>
+                        <span class="text-xs">Events</span>
+                    </div>
+                    <div class="nav-item" onclick="showPage('chat')">
+                        <i data-lucide="message-circle" class="menu-icon"></i>
+                        <span class="text-xs">Chat</span>
+                    </div>
+                    <div class="nav-item" onclick="showPage('payments')">
+                        <i data-lucide="credit-card" class="menu-icon"></i>
+                        <span class="text-xs">Pay</span>
+                    </div>
+                    <div class="nav-item" onclick="showPage('profile')">
+                        <i data-lucide="user-circle-2" class="menu-icon"></i>
+                        <span class="text-xs">Profile</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    
+    <!-- Login Modal (Phone Number) -->
+    <div id="modal-login" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4 text-center">Resident Login</h3>
+            
+            <input type="tel" id="login-phone" class="w-full border-gray-300 rounded-md p-2 mb-4" placeholder="10-digit Phone Number (e.g., 9876543210)" required maxlength="10">
+
+            <button class="w-full bg-indigo-600 text-white py-2 rounded-lg mb-4 font-medium shadow hover:bg-indigo-700" onclick="handleLoginAttempt()">
+                Sign In (Simulated OTP)
+            </button>
+            
+            <div class="text-center space-y-2">
+                <p class="text-sm text-gray-600">
+                    New to the community? 
+                    <button class="text-indigo-600 font-semibold hover:text-indigo-700" onclick="toggleModal('modal-login'); toggleModal('modal-register');">
+                        Register Now
+                    </button>
+                </p>
+                <p class="text-xs text-gray-400 border-t pt-2">
+                    <button class="text-gray-500 hover:text-red-500" onclick="handleAdminLogin()">
+                        Admin Login (Use Phone 0000000000)
+                    </button>
+                </p>
+                <button class="mt-2 text-gray-500 text-sm hover:text-gray-700" onclick="toggleModal('modal-login')">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Registration Modal (Phone Number) -->
+    <div id="modal-register" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4 text-center">New Resident Registration</h3>
+            
+            <input type="text" id="register-name" class="w-full border-gray-300 rounded-md p-2 mb-3" placeholder="Full Name" required>
+            <input type="text" id="register-unit" class="w-full border-gray-300 rounded-md p-2 mb-3" placeholder="Apartment Unit (e.g., A-101)" required>
+            <input type="tel" id="register-phone" class="w-full border-gray-300 rounded-md p-2 mb-4" placeholder="10-digit Phone Number (Login ID)" required maxlength="10">
+
+            <button class="w-full bg-green-600 text-white py-2 rounded-lg mb-4 font-medium shadow hover:bg-green-700" onclick="handleRegister()">
+                Register & Sign In
+            </button>
+            
+            <div class="text-center">
+                <button class="text-indigo-600 font-semibold text-sm hover:text-indigo-700" onclick="toggleModal('modal-register'); toggleModal('modal-login');">
+                    Already registered? Sign In
+                </button>
+                <button class="mt-4 text-gray-500 text-sm block w-full hover:text-gray-700" onclick="toggleModal('modal-register')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- RSVP Modal -->
+    <div id="modal-rsvp" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">RSVP for: <span id="rsvp-event-title" class="font-bold">Event</span></h3>
+            <p class="text-gray-600 mb-4">Are you sure you want to RSVP for this event?</p>
+            <div class="flex justify-end gap-2">
+                <button type="button" class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-rsvp')">Cancel</button>
+                <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="handleConfirmRSVP()">Confirm RSVP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPI Payment Modal -->
+    <div id="modal-upi-payment" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4 text-center">Complete Payment via UPI</h3>
+            
+            <div class="text-center mb-4 p-4 border rounded-lg bg-gray-50">
+                <p class="text-gray-600 text-sm">Paying for: <span id="upi-item-title" class="font-medium text-indigo-600">Item</span></p>
+                <p class="text-4xl font-extrabold text-indigo-700" id="upi-item-amount">₹0.00</p>
+            </div>
+
+            <p class="text-center text-sm text-gray-500 mb-4">
+                On mobile? Use the button below. On desktop? Scan the QR code.
+            </p>
+
+            <!-- Dynamic UPI Deep Link Button (Mobile-First) -->
+            <a id="upi-deeplink-button" href="#" 
+               class="w-full flex items-center justify-center p-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg hover:bg-indigo-700 transition mb-4">
+                <i data-lucide="scan" class="menu-icon w-5 h-5 mr-2"></i> Pay with UPI App
+            </a>
+
+
+            <div class="text-center border-t pt-4">
+                <img src="https://placehold.co/250x250/2563eb/ffffff?text=SCAN+FOR+UPI" alt="UPI QR Code Placeholder" class="w-40 h-40 mx-auto rounded-lg mb-2 shadow-md">
+                <p class="text-sm text-gray-400">Scan this code on desktop.</p>
+            </div>
+            
+            <div class="mt-6 flex justify-end gap-2">
+                <button type="button" class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-upi-payment')">Cancel</button>
+                <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="handleConfirmPayment()">Payment Complete (Simulate)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Pet Modal -->
+    <div id="modal-add-pet" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Add Your Pet</h3>
+            <form id="add-pet-form" class="space-y-3">
+                <input type="text" id="pet-name" class="w-full border-gray-300 rounded-md p-2" placeholder="Pet's Name" required>
+                <input type="text" id="pet-breed" class="w-full border-gray-300 rounded-md p-2" placeholder="Breed (e.g., Golden Retriever)" required>
+                <input type="url" id="pet-img" class="w-full border-gray-300 rounded-md p-2" placeholder="Image URL (e.g., https://...)" required>
+                <p class="text-xs text-gray-500">Please use a URL for the image (e.g., from an image hosting site).</p>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button type="button" class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-add-pet')">Cancel</button>
+                    <button type="button" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700" onclick="handleAddPet()">Add Pet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pet Care Request Modal -->
+    <div id="modal-pet-care" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Request a Caretaker</h3>
+            <form id="pet-care-form" class="space-y-3">
+                <input type="text" id="pet-care-dates" class="w-full border-gray-300 rounded-md p-2" placeholder="Dates Needed (e.g., Nov 20-22)" required>
+                <input type="tel" id="pet-care-phone" class="w-full border-gray-300 rounded-md p-2" placeholder="Your WhatsApp Phone (e.g., 9000012345)" required>
+                <textarea id="pet-care-desc" class="w-full border-gray-300 rounded-md p-2" rows="3" placeholder="Special instructions for your pet..." required></textarea>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button type="button" class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-pet-care')">Cancel</button>
+                    <button type="button" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" onclick="handleAddPetCareRequest()">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pet Comment Modal -->
+    <div id="modal-pet-comment" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Add Comment for <span id="comment-pet-name" class="font-bold"></span></h3>
+            <textarea id="pet-comment-input" class="w-full border-gray-300 rounded-md p-2" rows="3" placeholder="Write your comment..."></textarea>
+            <div class="mt-4 flex justify-end gap-2">
+                <button type="button" class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-pet-comment')">Cancel</button>
+                <button type="button" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="handleAddPetComment()">Post Comment</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offer Pet Sit Modal -->
+    <div id="modal-offer-petsit" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Offer to Pet Sit</h3>
+            <p id="offer-petsit-text" class="mb-4 text-gray-600">Send an offer to help care for this pet?</p>
+            <div class="mt-4 flex justify-end gap-2">
+                <button class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-offer-petsit')">Cancel</button>
+                <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700" onclick="handleConfirmPetsitOffer()">Send Offer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Media Modal (NEW) -->
+    <div id="modal-add-media" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Upload Media</h3>
+            <form id="add-media-form" class="space-y-3">
+                <input type="url" id="media-url" class="w-full border-gray-300 rounded-md p-2" placeholder="Image/Video URL (e.g., https://...)" required>
+                <input type="text" id="media-alt" class="w-full border-gray-300 rounded-md p-2" placeholder="Description/Caption" required>
+                <p class="text-xs text-gray-500">Note: Upload is simulated using a placeholder URL.</p>
+                <div class="mt-4 flex justify-end gap-2">
+                    <button type="button" class="text-gray-600 hover:text-gray-900" onclick="toggleModal('modal-add-media')">Cancel</button>
+                    <button type="button" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700" onclick="handleAddMedia()">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-40 hidden transition-opacity duration-300">
+        Message goes here.
+    </div>
+
+    <script>
+        // --- APPLICATION STATE ---
+        const appState = {
+            isAdmin: false,
+            userId: null, // Track logged in user ID
+            userName: 'Guest', // Display name
+            userPhone: null, // User's phone number
+            userUnit: null, // User's unit number
+            currentPage: 'home',
+            rsvpEventId: null,
+            pendingPayment: null, // To track payment in modal
+            commentingPetId: null, // Track pet for commenting
+            offeringPetsitPetId: null, // Track pet for pet-sit offer
+            
+            // Simulated User Database (Phone is the primary key)
+            registeredUsers: [
+                { id: 'admin-001', name: 'Admin User', phone: '0000000000', unit: 'M-001', role: 'admin' },
+                { id: 'user-123', name: 'Priya S.', phone: '9876543210', unit: 'A-101', role: 'resident' },
+                { id: 'user-B402', name: 'Rohan K.', phone: '9000012345', unit: 'B-402', role: 'resident' },
+            ],
+
+            events: [
+                { id: 1, title: 'Morning Yoga', date: '2025-11-20', location: 'Yoga Deck', desc: 'Start your day with rejuvenating yoga.', approved: true, rsvps: 12 },
+                { id: 2, title: 'Community Mixer', date: '2025-12-05', location: 'Clubhouse', desc: 'Get to know your neighbors.', approved: true, rsvps: 25 },
+                { id: 3, title: 'Book Club', date: '2025-11-28', location: 'Library', desc: 'Discussing "The Alchemist".', approved: true, rsvps: 8 },
+            ],
+            forumPosts: [
+                { id: 1, user: 'Admin', text: 'Welcome to the new community app! Use the forum to connect.' },
+                { id: 2, user: 'Priya S.', text: 'Does anyone know a good plumber in the area?' },
+                { id: 3, user: 'Rohan K.', text: 'Found a set of keys near the elevator in Block C.' },
+            ],
+            galleryImages: [
+                { id: 1, url: 'https://placehold.co/300x300/e0e7ff/4f46e5?text=Yoga+Class', alt: 'Yoga Event' },
+                { id: 2, url: 'https://placehold.co/300x300/fef2f2/ef4444?text=Community+Mixer', alt: 'Community Mixer' },
+                { id: 3, url: 'https://placehold.co/300x300/ecfdf5/059669?text=Pool+Party', alt: 'Pool Area' },
+                { id: 4, url: 'https://placehold.co/300x300/f3e8ff/9333ea?text=Garden+Day', alt: 'Community Garden' },
+                { id: 5, url: 'https://placehold.co/300x300/fff7ed/f97316?text=Clubhouse+Fun', alt: 'Clubhouse' },
+                { id: 6, url: 'https://placehold.co/300x300/d1fae5/065f46?text=Building+View', alt: 'Community' },
+            ],
+            petProfiles: [
+                { id: 1, name: 'Buddy', breed: 'Golden Retriever', owner: 'A-101', ownerId: 'user-123', img: 'https://placehold.co/200x200/fef3c7/b45309?text=Buddy', comments: [{user: 'Priya S.', text: 'So cute!'}], phone: '9876543210' },
+                { id: 2, name: 'Cleo', breed: 'Siamese Cat', owner: 'B-402', ownerId: 'user-B402', img: 'https://placehold.co/200x200/d1d5db/4b5563?text=Cleo', comments: [], phone: '9000000000' },
+            ],
+            petCareRequests: [
+                { id: 1, user: 'Rohan K.', dates: 'Nov 25-28', desc: 'Need someone to feed my cat Cleo twice a day.', phone: '9000012345' }
+            ],
+            subscriptions: [
+                { id: 'maint', title: 'Monthly Maintenance', desc: 'Covers all common area upkeep.', amount: 2500, isSubscribed: false },
+                { id: 'rent', title: 'Rent (Block A-101)', desc: 'Due on the 1st of each month.', amount: 20000, isSubscribed: false },
+                { id: 'yoga', title: 'Yoga Class Pass', desc: 'Access to all morning yoga sessions.', amount: 500, isSubscribed: false },
+                { id: 'gym', title: 'Gym Membership', desc: '24/7 access to the community gym.', amount: 300, isSubscribed: true },
+            ],
+            chatMessages: [
+                { id: 1, user: 'Admin User', unit: 'M-001', text: 'Welcome to the community chat! Feel free to ask questions here.', timestamp: Date.now() - 3600000 },
+                { id: 2, user: 'Priya S.', unit: 'A-101', text: 'Hi Admin, I have a question about the parking policy.', timestamp: Date.now() - 1800000 },
+            ],
+            // Quick help is not persisted, only notification is simulated
+        };
+
+        // --- CONSTANTS ---
+        const UPI_VPA = 'communityhub@okicici'; // Simulated VPA for the community
+
+        // --- DOM ELEMENTS ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const loginButton = document.getElementById('login-button');
+        const logoutButton = document.getElementById('logout-button');
+        const homeEventsList = document.getElementById('home-events-list');
+        const eventsList = document.getElementById('events-list');
+        const forumPostsList = document.getElementById('forum-posts-list');
+        const galleryGrid = document.getElementById('gallery-grid');
+        const petProfilesList = document.getElementById('pet-profiles-list');
+        const rsvpEventTitle = document.getElementById('rsvp-event-title');
+        const globalLoader = document.getElementById('global-loader');
+        const subscriptionsList = document.getElementById('subscriptions-list'); 
+        const upiItemTitle = document.getElementById('upi-item-title'); 
+        const upiItemAmount = document.getElementById('upi-item-amount'); 
+        const petCareRequestsList = document.getElementById('pet-care-requests-list');
+        const petGalleryGrid = document.getElementById('pet-gallery-grid');
+        const commentPetName = document.getElementById('comment-pet-name');
+        const upiDeeplinkButton = document.getElementById('upi-deeplink-button');
+        const chatMessagesContainer = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const adminMetrics = document.getElementById('admin-metrics');
+        
+        // Profile Page Elements
+        const profileDisplayName = document.getElementById('profile-display-name');
+        const profileDisplayUnit = document.getElementById('profile-display-unit');
+        const profileDisplayRole = document.getElementById('profile-display-role');
+        const profileNameInput = document.getElementById('profile-name');
+        const profileUnitInput = document.getElementById('profile-unit');
+        const profilePhoneInput = document.getElementById('profile-phone');
+
+
+        // --- HELPER FUNCTIONS ---
+
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                lucide.createIcons();
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300); // Wait for fade out transition
+            }, 3000);
+        }
+
+        function simulateLoading(callback) {
+            globalLoader.classList.remove('hidden');
+            setTimeout(() => {
+                globalLoader.classList.add('hidden');
+                if (callback) callback();
+            }, 500); // Simulate network delay
+        }
+        
+        function validatePhone(phone) {
+            return /^\d{10}$/.test(phone);
+        }
+
+        // --- AUTHENTICATION FUNCTIONS ---
+        
+        function setAuthState(user) {
+            appState.isAdmin = user.role === 'admin';
+            appState.userId = user.id;
+            appState.userName = user.name;
+            appState.userPhone = user.phone;
+            appState.userUnit = user.unit;
+            appState.userRole = user.role;
+            
+            // Update UI
+            loginButton.classList.add('hidden');
+            logoutButton.classList.remove('hidden');
+            
+            // Re-render dynamic content that depends on user role
+            renderEvents(); 
+            renderForumPosts();
+            renderPetProfiles();
+            renderProfile(); 
+            
+            showToast(`Welcome, ${appState.userName}!`);
+        }
+        
+        function handleLoginAttempt() {
+            const phone = document.getElementById('login-phone').value.trim();
+            
+            if (!validatePhone(phone)) {
+                 showToast("Please enter a valid 10-digit phone number.");
+                 return;
+            }
+            
+            const user = appState.registeredUsers.find(u => u.phone === phone);
+
+            if (user) {
+                toggleModal('modal-login');
+                setAuthState(user);
+                document.getElementById('login-phone').value = '';
+            } else {
+                showToast("Phone number not registered. Please register first.");
+            }
+        }
+        
+        function handleAdminLogin() {
+            const admin = appState.registeredUsers.find(u => u.role === 'admin');
+            if (admin) {
+                toggleModal('modal-login');
+                setAuthState(admin);
+            } else {
+                 showToast("Admin account not found in simulation.");
+            }
+        }
+        
+        function handleRegister() {
+            const name = document.getElementById('register-name').value.trim();
+            const unit = document.getElementById('register-unit').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            
+            if (!name || !unit || !phone) {
+                showToast("Please fill all fields.");
+                return;
+            }
+            
+            if (!validatePhone(phone)) {
+                showToast("Please enter a valid 10-digit phone number.");
+                return;
+            }
+            
+            if (appState.registeredUsers.some(u => u.phone === phone)) {
+                showToast("This phone number is already registered. Please sign in.");
+                return;
+            }
+            
+            // Simulate unique user ID generation
+            const newUserId = 'user-' + Math.random().toString(36).substring(2, 9);
+            
+            const newUser = {
+                id: newUserId,
+                name,
+                phone,
+                unit,
+                role: 'resident'
+            };
+            
+            appState.registeredUsers.push(newUser);
+            
+            // Automatically log in the new user
+            toggleModal('modal-register');
+            setAuthState(newUser);
+            showToast("Registration successful! Welcome to the Community Hub.");
+            
+            // Clear registration form fields
+            document.getElementById('register-name').value = '';
+            document.getElementById('register-unit').value = '';
+            document.getElementById('register-phone').value = '';
+        }
+
+
+        function handleLogout() {
+            appState.isAdmin = false;
+            appState.userId = null;
+            appState.userName = 'Guest';
+            appState.userPhone = null;
+            appState.userUnit = null;
+            appState.userRole = null;
+            logoutButton.classList.add('hidden');
+            loginButton.classList.remove('hidden');
+            showToast('Logged out successfully.');
+
+            // Re-render dynamic content
+            renderEvents();
+            renderForumPosts();
+            renderPetProfiles();
+            renderProfile();
+            showPage('home'); // Redirect to home after logout
+        }
+
+        // --- RENDER FUNCTIONS ---
+        
+        function renderProfile() {
+            if (!appState.userId) {
+                profileDisplayName.textContent = 'Please Log In';
+                profileDisplayUnit.textContent = '';
+                profileDisplayRole.textContent = '';
+                profileNameInput.value = '';
+                profileUnitInput.value = '';
+                profilePhoneInput.value = '';
+                adminDashboard.classList.add('hidden');
+                return;
+            }
+            
+            profileDisplayName.textContent = appState.userName;
+            profileDisplayUnit.textContent = `Unit: ${appState.userUnit}`;
+            profileDisplayRole.textContent = appState.isAdmin ? 'Role: Admin' : 'Role: Resident';
+            
+            profileNameInput.value = appState.userName;
+            profileUnitInput.value = appState.userUnit;
+            profilePhoneInput.value = appState.userPhone;
+
+            // --- Admin Dashboard Logic ---
+            if (appState.isAdmin) {
+                const pendingEventsCount = appState.events.filter(e => !e.approved).length;
+                const totalUsers = appState.registeredUsers.length;
+                const activeRequests = appState.petCareRequests.length;
+                
+                adminMetrics.innerHTML = `
+                    <div class="p-3 bg-red-100 rounded-lg shadow-sm">
+                        <p class="text-3xl font-bold text-red-700">${pendingEventsCount}</p>
+                        <p class="text-sm text-gray-700">Pending Events</p>
+                    </div>
+                    <div class="p-3 bg-red-100 rounded-lg shadow-sm">
+                        <p class="text-3xl font-bold text-red-700">${totalUsers}</p>
+                        <p class="text-sm text-gray-700">Total Residents</p>
+                    </div>
+                    <div class="p-3 bg-red-100 rounded-lg shadow-sm col-span-2">
+                        <p class="text-3xl font-bold text-red-700">${activeRequests}</p>
+                        <p class="text-sm text-gray-700">Active Pet Care Requests</p>
+                    </div>
+                `;
+                adminDashboard.classList.remove('hidden');
+            } else {
+                adminDashboard.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        function renderEvents() {
+            if (!eventsList || !homeEventsList) return;
+            eventsList.innerHTML = '';
+            homeEventsList.innerHTML = '';
+
+            // Filter for approved events
+            const approvedEvents = appState.events.filter(e => e.approved);
+
+            approvedEvents.forEach(event => {
+                const isRsvpd = false; // Simplified for this demo
+                
+                const eventHtml = `
+                    <div class="bg-white p-4 rounded-xl shadow border border-gray-200">
+                        <h4 class="font-bold text-lg text-indigo-700">${event.title}</h4>
+                        <p class="text-sm text-gray-600 flex items-center mt-1">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-2"></i> ${event.date} at ${event.location}
+                        </p>
+                        <p class="text-sm text-gray-500 mt-2">${event.desc}</p>
+                        <div class="flex justify-between items-center mt-3 pt-3 border-t">
+                            <p class="text-xs text-gray-500">${event.rsvps} RSVP${event.rsvps !== 1 ? 's' : ''}</p>
+                            ${appState.userId ? 
+                                `<button 
+                                    class="text-sm px-3 py-1 rounded-full ${isRsvpd ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-green-500 text-white hover:bg-green-600'}"
+                                    ${isRsvpd ? 'disabled' : ''}
+                                    onclick="handleRSVP(${event.id}, '${event.title}')">
+                                    ${isRsvpd ? 'RSVP Confirmed' : 'RSVP Now'}
+                                </button>` :
+                                `<button class="text-sm px-3 py-1 rounded-full bg-gray-500 text-white" onclick="toggleModal('modal-login')">Login to RSVP</button>`
+                            }
+                        </div>
+                    </div>
+                `;
+
+                eventsList.innerHTML += eventHtml;
+
+                // Add to home snapshot (first 2 events)
+                if (homeEventsList.children.length < 2) {
+                    homeEventsList.innerHTML += eventHtml;
+                }
+            });
+
+            // Handle unapproved events for admin view
+            if (appState.isAdmin) {
+                eventsList.innerHTML += `<h3 class="text-xl font-semibold mt-6 text-red-600">Pending Event Suggestions:</h3>`;
+                const pendingEvents = appState.events.filter(e => !e.approved);
+                if (pendingEvents.length === 0) {
+                     eventsList.innerHTML += `<p class="text-gray-500 text-sm italic mt-2">No pending events.</p>`;
+                }
+                pendingEvents.forEach(event => {
+                    eventsList.innerHTML += `
+                        <div class="bg-red-50 p-4 rounded-xl shadow border border-red-200">
+                            <h4 class="font-bold text-lg text-red-700">${event.title} (Suggested)</h4>
+                            <p class="text-sm text-gray-500 mt-1">${event.desc}</p>
+                            <div class="flex justify-end space-x-2 mt-3 pt-3 border-t">
+                                <button class="text-sm px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700" onclick="handleEventApproval(${event.id}, true)">Approve</button>
+                                <button class="text-sm px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600" onclick="handleEventApproval(${event.id}, false)">Reject</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            lucide.createIcons(); // Re-render icons
+        }
+
+        function renderForumPosts() {
+            if (!forumPostsList) return;
+            forumPostsList.innerHTML = '';
+            // Display posts in reverse chronological order
+            [...appState.forumPosts].reverse().forEach(post => {
+                forumPostsList.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow border border-gray-200">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold text-indigo-600">${post.user}</span>
+                            <span class="text-xs text-gray-400">${new Date().toLocaleTimeString()}</span>
+                        </div>
+                        <p class="text-gray-700 mt-1">${post.text}</p>
+                        <div class="flex space-x-2 mt-2 pt-2 border-t text-sm text-gray-500">
+                            <button class="flex items-center hover:text-indigo-600"><i data-lucide="message-square" class="w-4 h-4 mr-1"></i> Reply</button>
+                            <button class="flex items-center hover:text-indigo-600"><i data-lucide="thumbs-up" class="w-4 h-4 mr-1"></i> Like</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+        
+        function renderGallery() {
+            if (!galleryGrid) return;
+            galleryGrid.innerHTML = '';
+            if (appState.galleryImages.length === 0) {
+                 galleryGrid.innerHTML = '<p class="text-gray-500 text-sm col-span-2">No media uploaded yet. Be the first!</p>';
+                 return;
+            }
+            
+            [...appState.galleryImages].reverse().forEach(image => {
+                galleryGrid.innerHTML += `
+                    <img src="${image.url}" alt="${image.alt}" 
+                         class="w-full h-auto aspect-square rounded-lg object-cover shadow-sm hover:opacity-80 transition-opacity"
+                         onerror="this.src='https://placehold.co/300x300/e0e7ff/4f46e5?text=Bad+URL'">
+                `;
+            });
+        }
+        
+        function renderPetProfiles() {
+            if (!petProfilesList) return;
+            petProfilesList.innerHTML = '';
+            if (appState.petProfiles.length === 0) {
+                 petProfilesList.innerHTML = '<p class="text-gray-500 text-sm">No pet profiles yet. Add your furry friend!</p>';
+                 return;
+            }
+
+            appState.petProfiles.forEach(pet => {
+                let commentsHtml = pet.comments.map(comment => `
+                    <div class="text-xs bg-gray-100 p-1.5 rounded-md mt-1">
+                        <span class="font-semibold">${comment.user}:</span>
+                        <span class="text-gray-700">${comment.text}</span>
+                    </div>
+                `).join('');
+
+                let buttonsHtml = '';
+                // If logged in and not the owner
+                if (appState.userId && appState.userId !== pet.ownerId) {
+                    buttonsHtml += `<button class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full hover:bg-green-200" onclick="handleOpenPetsitOfferModal(${pet.id}, '${pet.name}')">Offer to Pet Sit</button>`;
+                }
+                
+                // Allow commenting if logged in
+                if (appState.userId) {
+                    buttonsHtml += `<button class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full hover:bg-indigo-200" onclick="handleOpenPetCommentModal(${pet.id}, '${pet.name}')">Add Comment</button>`;
+                }
+
+                
+                petProfilesList.innerHTML += `
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                        <div class="flex gap-3">
+                            <img src="${pet.img}" alt="${pet.name}" class="w-24 h-24 rounded-lg object-cover" onerror="this.src='https://placehold.co/200x200/d1d5db/4b5563?text=No+Img'">
+                            <div class="flex-1">
+                                <h4 class="font-semibold text-lg">${pet.name}</h4>
+                                <p class="text-sm text-gray-500">${pet.breed}</p>
+                                <p class="text-xs text-gray-400">Owner: ${pet.owner} (${pet.ownerId === appState.userId ? 'You' : pet.owner})</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <h5 class="text-sm font-semibold mb-1">Comments:</h5>
+                            <div class="max-h-20 overflow-y-auto space-y-1">
+                                ${commentsHtml || '<p class="text-xs text-gray-400">No comments yet.</p>'}
+                            </div>
+                            <div class="flex justify-end gap-2 mt-2 pt-2 border-t">
+                                ${buttonsHtml || '<p class="text-xs text-gray-400">Login to interact</p>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function renderPetCareRequests() {
+            if (!petCareRequestsList) return;
+            petCareRequestsList.innerHTML = '';
+            if (appState.petCareRequests.length === 0) {
+                petCareRequestsList.innerHTML = '<p class="text-gray-500 text-sm">No active caretaker requests.</p>';
+                return;
+            }
+            [...appState.petCareRequests].reverse().forEach(req => {
+                const whatsappLink = `https://wa.me/91${req.phone}?text=${encodeURIComponent(`Hi ${req.user.split(' ')[0]}, I saw your pet care request for ${req.dates} on the Community App and I might be able to help!`)}`;
+                
+                petCareRequestsList.innerHTML += `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 shadow-sm">
+                        <p class="font-semibold text-blue-800">${req.user} needs help</p>
+                        <p class="text-sm text-gray-700"><span class="font-medium">Dates:</span> ${req.dates}</p>
+                        <p class="text-sm text-gray-700 mt-1">${req.desc}</p>
+                        <div class="flex space-x-2 mt-2 pt-2 border-t">
+                            <button class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full hover:bg-blue-700">Help Out</button>
+                            <a href="${whatsappLink}" 
+                                target="_blank"
+                                class="text-xs bg-green-500 text-white px-2 py-1 rounded-full flex items-center hover:bg-green-600">
+                                <i data-lucide="message-circle" class="w-3 h-3 mr-1"></i> WhatsApp Contact
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function renderPetGallery() {
+            if (!petGalleryGrid) return;
+            petGalleryGrid.innerHTML = '';
+            const petImages = appState.petProfiles.map(pet => pet.img);
+
+            if (petImages.length === 0) {
+                petGalleryGrid.innerHTML = '<p class="text-gray-500 text-sm col-span-3">No pet photos yet. Add your pet!</p>';
+                return;
+            }
+
+            petImages.forEach(imgUrl => {
+                petGalleryGrid.innerHTML += `
+                    <div class="aspect-square rounded-lg overflow-hidden">
+                        <img src="${imgUrl}" alt="Pet Photo" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/200x200/d1d5db/4b5563?text=No+Img'">
+                    </div>
+                `;
+            });
+        }
+        
+        function renderSubscriptions() {
+            if (!subscriptionsList) return;
+            subscriptionsList.innerHTML = '';
+            appState.subscriptions.forEach(sub => {
+                subscriptionsList.innerHTML += `
+                    <div class="p-4 bg-white rounded-lg shadow border border-gray-200">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold text-lg">${sub.title}</h4>
+                                <p class="text-sm text-gray-500">${sub.desc}</p>
+                            </div>
+                            <p class="text-xl font-bold text-gray-800">₹${sub.amount.toLocaleString()}</p>
+                        </div>
+                        ${appState.userId ? 
+                            `<button 
+                                class="mt-3 w-full py-2 rounded-lg font-medium shadow ${sub.isSubscribed 
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                                    : 'bg-green-600 text-white hover:bg-green-700'}" 
+                                ${sub.isSubscribed ? 'disabled' : ''}
+                                onclick="handlePaymentClick(${sub.isSubscribed ? null : `'${sub.id}'`}, '${sub.title}', ${sub.amount})">
+                                ${sub.isSubscribed ? 'Subscribed' : 'Subscribe Now'}
+                            </button>` : 
+                            `<button class="mt-3 w-full py-2 rounded-lg font-medium shadow bg-gray-500 text-white" onclick="toggleModal('modal-login')">Login to Pay</button>`
+                        }
+                    </div>
+                `;
+            });
+        }
+
+        function renderChat() {
+            if (!chatMessagesContainer) return;
+
+            if (!appState.userId) {
+                chatMessagesContainer.innerHTML = `<p class="text-center text-gray-500 italic mt-4">Please log in to join the chat.</p>`;
+                return;
+            }
+
+            const messagesHtml = appState.chatMessages.map(msg => {
+                const isSelf = msg.user === appState.userName;
+                const alignClass = isSelf ? 'justify-end' : 'justify-start';
+                const bubbleClass = isSelf ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-tl-none';
+                const userDisplay = isSelf ? 'You' : `${msg.user} (${msg.unit})`;
+                const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="flex ${alignClass} mb-3">
+                        <div class="max-w-xs md:max-w-md">
+                            <div class="text-xs ${isSelf ? 'text-right text-gray-500' : 'text-left text-indigo-600 font-semibold'} mb-1">${userDisplay}</div>
+                            <div class="p-3 ${bubbleClass} rounded-xl shadow-md text-sm">
+                                ${msg.text}
+                            </div>
+                            <div class="text-right text-xs text-gray-400 mt-0.5">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            chatMessagesContainer.innerHTML = messagesHtml;
+            // Scroll to the bottom of the chat container
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; 
+            lucide.createIcons();
+        }
+
+        // --- PAGE NAVIGATION ---
+        function showPage(pageId) {
+            // Check for login requirement
+            if (['profile', 'pets', 'payments', 'chat'].includes(pageId) && !appState.userId) {
+                showToast("Please log in to access this section.");
+                toggleModal('modal-login');
+                return;
+            }
+
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show selected page
+            const pageEl = document.getElementById(`page-${pageId}`);
+            if (pageEl) {
+                pageEl.classList.add('active');
+            } else {
+                console.error(`Page with id 'page-${pageId}' not found.`);
+                document.getElementById('page-home').classList.add('active'); // Fallback
+                pageId = 'home'; // Reset pageId to fallback
+            }
+
+            // Update nav
+            navItems.forEach(item => item.classList.remove('active'));
+            const navItem = document.querySelector(`.nav-item[onclick="showPage('${pageId}')"]`);
+            if (navItem) {
+                navItem.classList.add('active');
+            }
+            
+            // Hide AI tips container when leaving green page
+            const aiTipsContainer = document.getElementById('ai-tips-container');
+            if (aiTipsContainer && pageId !== 'green') {
+                aiTipsContainer.classList.add('hidden');
+                aiTipsContainer.querySelector('#ai-tips-content').textContent = ''; // Clear content
+            }
+
+            // Re-render dynamic pages if navigating to them
+            if (pageId === 'pets') {
+                renderPetProfiles();
+                renderPetCareRequests();
+                renderPetGallery();
+            } else if (pageId === 'payments') {
+                renderSubscriptions();
+            } else if (pageId === 'profile') { 
+                renderProfile();
+            } else if (pageId === 'gallery') {
+                renderGallery();
+            } else if (pageId === 'events') {
+                renderEvents();
+            } else if (pageId === 'chat') {
+                renderChat();
+            }
+            
+            appState.currentPage = pageId;
+            lucide.createIcons(); // Ensure icons are created for the new page
+        }
+
+        // --- PROFILE HANDLERS ---
+        function handleUpdateProfile() {
+            if (!appState.userId) return;
+
+            const newName = profileNameInput.value.trim();
+            const newUnit = profileUnitInput.value.trim();
+
+            if (!newName || !newUnit) {
+                showToast("Name and Unit cannot be empty.");
+                return;
+            }
+
+            // 1. Update the local state
+            appState.userName = newName;
+            appState.userUnit = newUnit;
+
+            // 2. Find and update the user in the simulated database
+            const userIndex = appState.registeredUsers.findIndex(u => u.id === appState.userId);
+            if (userIndex > -1) {
+                appState.registeredUsers[userIndex].name = newName;
+                appState.registeredUsers[userIndex].unit = newUnit;
+            }
+
+            // 3. Update the UI
+            renderProfile();
+            renderForumPosts(); 
+            renderPetProfiles(); 
+
+            showToast("Profile updated successfully!");
+        }
+
+        // --- CHAT HANDLERS (NEW) ---
+        function handleSendMessage() {
+            if (!appState.userId) {
+                showToast("Please log in to send messages.");
+                toggleModal('modal-login');
+                return;
+            }
+            const text = chatInput.value.trim();
+            
+            if (text) {
+                // Prevent multiple submissions during simulated load
+                chatInput.disabled = true;
+                globalLoader.classList.remove('hidden');
+
+                setTimeout(() => {
+                    const newMessage = {
+                        id: appState.chatMessages.length + 1,
+                        user: appState.userName,
+                        unit: appState.userUnit,
+                        text: text,
+                        timestamp: Date.now()
+                    };
+                    appState.chatMessages.push(newMessage);
+                    chatInput.value = '';
+                    chatInput.disabled = false;
+                    globalLoader.classList.add('hidden');
+                    renderChat();
+                    showToast('Message sent!');
+                }, 500); // Simulate network delay
+            } else {
+                showToast('Message cannot be empty.');
+            }
+        }
+        
+        // --- EVENT HANDLERS (REST) ---
+        
+        function handleRSVP(eventId, eventTitle) {
+            if (!appState.userId) {
+                showToast("Please log in to RSVP.");
+                toggleModal('modal-login');
+                return;
+            }
+            appState.rsvpEventId = eventId;
+            rsvpEventTitle.textContent = eventTitle;
+            toggleModal('modal-rsvp');
+        }
+        
+        function handleConfirmRSVP() {
+            const event = appState.events.find(e => e.id === appState.rsvpEventId);
+            if (event) {
+                // Check if already RSVPd (simple check)
+                if (event.rsvps < 15) { // Arbitrary limit for demo
+                    event.rsvps += 1; // Simulate RSVP
+                    showToast('You have successfully RSVPd!');
+                } else {
+                    showToast('Sorry, this event is full!');
+                }
+            }
+            renderEvents();
+            appState.rsvpEventId = null;
+            toggleModal('modal-rsvp');
+        }
+        
+        function handleSuggestEvent() {
+            if (!appState.userId) {
+                showToast("Please log in to suggest an event.");
+                toggleModal('modal-login');
+                return;
+            }
+            const newEventId = appState.events.reduce((max, e) => Math.max(max, e.id), 0) + 1;
+            const newEvent = {
+                id: newEventId,
+                title: `Suggested Event by ${appState.userName}`,
+                date: 'TBD (Awaiting Approval)',
+                location: 'TBD',
+                desc: `A new activity suggested by ${appState.userName}. Needs admin review.`,
+                approved: false,
+                rsvps: 0
+            };
+            appState.events.push(newEvent);
+            renderEvents();
+            showToast('Event suggested! Awaiting admin approval.');
+        }
+
+        function handleEventApproval(eventId, isApproved) {
+            simulateLoading(() => {
+                const eventIndex = appState.events.findIndex(e => e.id === eventId);
+                if (eventIndex > -1) {
+                    if (isApproved) {
+                        appState.events[eventIndex].approved = true;
+                        appState.events[eventIndex].title = appState.events[eventIndex].title.replace('(Suggested)', '').trim();
+                        showToast('Event approved and posted!');
+                    } else {
+                        appState.events.splice(eventIndex, 1);
+                        showToast('Event rejected and removed.');
+                    }
+                    renderEvents();
+                    renderProfile(); // Update dashboard metric
+                }
+            });
+        }
+        
+        function handleQuickHelp() {
+            if (!appState.userId) {
+                 showToast("Please log in for Quick Help. Emergency contact: 9999999999");
+                 toggleModal('modal-login');
+                 return;
+            }
+            // In a real app, this would trigger a PUSH or SMS notification to admins
+            showToast('URGENT REQUEST SENT to admins! They will contact you shortly.');
+        }
+        
+        function handleNewPost() {
+            if (!appState.userId) {
+                showToast("Please log in to post to the forum.");
+                toggleModal('modal-login');
+                return;
+            }
+            const input = document.getElementById('forum-post-input');
+            const text = input.value.trim();
+            
+            if (text) {
+                const newPost = {
+                    id: appState.forumPosts.length + 1,
+                    user: appState.userName,
+                    text: text
+                };
+                appState.forumPosts.push(newPost);
+                input.value = '';
+                renderForumPosts();
+                showToast('Post added!');
+            } else {
+                showToast('Post cannot be empty.');
+            }
+        }
+
+        function handleAISuggestion() {
+            const aiTipsContainer = document.getElementById('ai-tips-container');
+            const aiTipsContent = document.getElementById('ai-tips-content');
+            
+            // Show loader first
+            aiTipsContainer.classList.remove('hidden');
+            aiTipsContent.innerHTML = `<i data-lucide="loader-circle" class="w-4 h-4 mr-2 animate-spin"></i> Generating tip...`;
+            lucide.createIcons();
+
+            simulateLoading(() => {
+                const tip = "To reduce water usage, install low-flow aerators on all faucets. This can save up to 30% water without compromising pressure. Also, consider signing up for the 'Green Volunteer Group' via the WhatsApp link below!";
+                aiTipsContent.textContent = tip;
+            });
+        }
+        
+        function handlePaymentClick(id, title, amount) {
+            if (!appState.userId) {
+                showToast("Please log in to make a payment.");
+                toggleModal('modal-login');
+                return;
+            }
+
+            let paymentAmount = amount;
+            
+            // Special case for donation to get amount from input
+            if (id === 'donate') {
+                const donateAmount = document.getElementById('donate-amount').value;
+                paymentAmount = parseFloat(donateAmount) || 0;
+                if (paymentAmount <= 0) {
+                    showToast("Please enter a valid donation amount.");
+                    return;
+                }
+            }
+            
+            // Generate a simple, unique transaction ID (simulated)
+            const transactionId = 'CH' + Date.now().toString().slice(-8);
+
+            // Construct the UPI Deep Link URL
+            const encodedTitle = encodeURIComponent(title);
+            const upiLink = `upi://pay?pa=${UPI_VPA}&pn=Community%20Hub&mc=0000&tid=${transactionId}&tr=${transactionId}&am=${paymentAmount.toFixed(2)}&cu=INR&tn=${encodedTitle}`;
+
+            appState.pendingPayment = { id, title, amount: paymentAmount, upiLink };
+
+            // Populate and show modal
+            upiItemTitle.textContent = title;
+            upiItemAmount.textContent = `₹${paymentAmount.toLocaleString()}`;
+            upiDeeplinkButton.href = upiLink;
+            
+
+            toggleModal('modal-upi-payment');
+        }
+
+        function handleConfirmPayment() {
+            if (!appState.pendingPayment) return;
+
+            const { id } = appState.pendingPayment;
+
+            // Check if it's a subscription and update its state
+            if (id && id !== 'donate') {
+                const subIndex = appState.subscriptions.findIndex(s => s.id === id);
+                if (subIndex > -1) {
+                    appState.subscriptions[subIndex].isSubscribed = true;
+                }
+            }
+            
+            // Clear pending payment
+            appState.pendingPayment = null;
+
+            // For donation, clear the input
+            if (id === 'donate') {
+                document.getElementById('donate-amount').value = '';
+            }
+
+            // Re-render
+            if (appState.currentPage === 'payments') { renderSubscriptions(); }
+
+            toggleModal('modal-upi-payment');
+            showToast('Payment successful!');
+        }
+
+        // --- PET FUNCTIONS ---
+        
+        function handleOpenAddPetModal() {
+            if (!appState.userId) {
+                showToast("Please log in to add your pet.");
+                toggleModal('modal-login');
+                return;
+            }
+            document.getElementById('add-pet-form').reset();
+            toggleModal('modal-add-pet');
+        }
+
+        function handleAddPet() {
+            const name = document.getElementById('pet-name').value;
+            const breed = document.getElementById('pet-breed').value;
+            const img = document.getElementById('pet-img').value;
+
+            if (!name || !breed || !img) {
+                showToast("Please fill out all fields.");
+                return;
+            }
+
+            const newPet = {
+                id: appState.petProfiles.reduce((max, p) => Math.max(max, p.id), 0) + 1,
+                name,
+                breed,
+                owner: appState.userName,
+                ownerId: appState.userId,
+                img,
+                comments: [],
+                phone: appState.userPhone,
+            };
+
+            appState.petProfiles.push(newPet);
+            renderPetProfiles();
+            renderPetGallery();
+            toggleModal('modal-add-pet');
+            showToast(`${name} has been added to the Pet Corner!`);
+        }
+        
+        function handleAddPetCareRequest() {
+            if (!appState.userId) {
+                showToast("Please log in to make a request.");
+                toggleModal('modal-login');
+                return;
+            }
+            const dates = document.getElementById('pet-care-dates').value;
+            const phone = document.getElementById('pet-care-phone').value;
+            const desc = document.getElementById('pet-care-desc').value;
+
+            if (!dates || !phone || !desc) {
+                showToast("Please fill out all fields.");
+                return;
+            }
+            
+            if (!validatePhone(phone)) {
+                 showToast("Please enter a valid 10-digit phone number (digits only).");
+                 return;
+            }
+
+            const newRequest = {
+                id: appState.petCareRequests.length + 1,
+                user: appState.userName,
+                dates,
+                desc,
+                phone
+            };
+            appState.petCareRequests.push(newRequest);
+            renderPetCareRequests();
+            document.getElementById('pet-care-form').reset();
+            toggleModal('modal-pet-care');
+            showToast("Your caretaker request has been posted!");
+            renderProfile(); // Update dashboard metric
+        }
+
+        function handleOpenPetCommentModal(petId, petName) {
+            if (!appState.userId) {
+                showToast("Please log in to comment.");
+                toggleModal('modal-login');
+                return;
+            }
+            appState.commentingPetId = petId;
+            commentPetName.textContent = petName;
+            document.getElementById('pet-comment-input').value = '';
+            toggleModal('modal-pet-comment');
+        }
+
+        function handleAddPetComment() {
+            const text = document.getElementById('pet-comment-input').value.trim();
+            if (!text) {
+                showToast("Please write a comment.");
+                return;
+            }
+
+            const pet = appState.petProfiles.find(p => p.id === appState.commentingPetId);
+            if (pet) {
+                pet.comments.push({
+                    user: appState.userName,
+                    text: text
+                });
+                renderPetProfiles();
+                toggleModal('modal-pet-comment');
+                showToast("Comment added!");
+            }
+            appState.commentingPetId = null;
+        }
+
+        function handleOpenPetsitOfferModal(petId, petName) {
+            if (!appState.userId) {
+                showToast("Please log in to make an offer.");
+                toggleModal('modal-login');
+                return;
+            }
+            const pet = appState.petProfiles.find(p => p.id === petId);
+            appState.offeringPetsitPetId = petId;
+            document.getElementById('offer-petsit-text').textContent = `Send an offer to ${pet.owner} to help care for ${pet.name}?`;
+            toggleModal('modal-offer-petsit');
+        }
+
+        function handleConfirmPetsitOffer() {
+            const pet = appState.petProfiles.find(p => p.id === appState.offeringPetsitPetId);
+            showToast(`Offer sent to ${pet.owner} (Phone: ${pet.phone}) to help with ${pet.name}!`);
+            toggleModal('modal-offer-petsit');
+            appState.offeringPetsitPetId = null;
+        }
+
+        function handleViewVaccinations() {
+            showToast("This would open the pet's vaccination records/chart.");
+        }
+
+        // --- MEDIA GALLERY FUNCTIONS (NEW) ---
+
+        function handleOpenAddMediaModal() {
+            if (!appState.userId) {
+                showToast("Please log in to share media.");
+                toggleModal('modal-login');
+                return;
+            }
+            document.getElementById('add-media-form').reset();
+            toggleModal('modal-add-media');
+        }
+
+        function handleAddMedia() {
+            const url = document.getElementById('media-url').value;
+            const alt = document.getElementById('media-alt').value;
+
+            if (!url || !alt) {
+                showToast("Please provide both a URL and a description.");
+                return;
+            }
+
+            const newMedia = {
+                id: appState.galleryImages.reduce((max, m) => Math.max(max, m.id), 0) + 1,
+                url: url,
+                alt: alt,
+                user: appState.userName
+            };
+
+            appState.galleryImages.push(newMedia);
+            renderGallery();
+            toggleModal('modal-add-media');
+            showToast(`Media posted by ${appState.userName}!`);
+        }
+
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial render of all content
+            renderEvents();
+            renderForumPosts();
+            renderGallery();
+            renderPetProfiles();
+            renderSubscriptions();
+            renderPetCareRequests();
+            renderPetGallery();
+            renderProfile(); 
+            renderChat();
+
+            // Activate icons
+            lucide.createIcons();
+            
+            // Set default user state (Guest)
+            appState.userId = null;
+            appState.userName = 'Guest';
+            appState.userPhone = null;
+            appState.userUnit = null;
+            appState.userRole = null;
+
+            // Add event listener for Enter key in chat input
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent default newline
+                    handleSendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
