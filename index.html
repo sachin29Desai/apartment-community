@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
+<<<<<<< HEAD
     <style>
         /* Custom styles for layout and transitions */
         body {
@@ -60,6 +61,10 @@
             padding-right: 8px; /* For scrollbar spacing */
         }
     </style>
+=======
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
 </head>
 <body>
 
@@ -108,8 +113,13 @@
                         <i data-lucide="message-circle-code" class="menu-icon w-5 h-5 mr-2"></i> Chat with Admin on WhatsApp
                     </a>
 
+<<<<<<< HEAD
                     <!-- Quick Actions -->
                     <div class="grid grid-cols-3 gap-3">
+=======
+                    <!-- Quick Actions Grid -->
+                    <div class="grid grid-cols-2 gap-3">
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
                         <button class="p-3 bg-blue-100 rounded-xl flex flex-col items-center shadow-sm hover:bg-blue-200" onclick="showPage('payments')">
                             <i data-lucide="wallet" class="menu-icon text-blue-600"></i>
                             <span class="text-xs font-medium mt-1">Pay Bills</span>
@@ -122,6 +132,14 @@
                             <i data-lucide="paw-print" class="menu-icon text-yellow-600"></i>
                             <span class="text-xs font-medium mt-1">Pet Corner</span>
                         </button>
+<<<<<<< HEAD
+=======
+                        <!-- NEW: Sports Button -->
+                        <button class="p-3 bg-orange-100 rounded-xl flex flex-col items-center shadow-sm hover:bg-orange-200" onclick="showPage('sports')">
+                            <i data-lucide="trophy" class="menu-icon text-orange-600"></i>
+                            <span class="text-xs font-medium mt-1">Sports Hub</span>
+                        </button>
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
                     </div>
 
                     <!-- Upcoming Events Snapshot -->
@@ -131,6 +149,47 @@
                     </div>
                 </div>
 
+<<<<<<< HEAD
+=======
+                <!-- Page: Sports Hub (NEW) -->
+                <div id="page-sports" class="page space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-semibold">Sports Hub</h2>
+                        <button class="text-xs bg-orange-600 text-white px-3 py-1.5 rounded-full font-medium" onclick="handleShowMyStats()">
+                            My Stats
+                        </button>
+                    </div>
+
+                    <!-- Sport Toggle -->
+                    <div class="flex bg-gray-200 p-1 rounded-lg mb-4">
+                        <button id="btn-cricket" class="flex-1 py-1.5 text-sm font-medium rounded-md bg-white shadow text-gray-800" onclick="toggleSport('cricket')">Cricket</button>
+                        <button id="btn-badminton" class="flex-1 py-1.5 text-sm font-medium rounded-md text-gray-600 hover:text-gray-800" onclick="toggleSport('badminton')">Badminton</button>
+                    </div>
+
+                    <!-- Cricket Section -->
+                    <div id="section-cricket" class="space-y-4">
+                        <h3 class="font-bold text-lg text-indigo-700">Cricket Leaderboard</h3>
+                        <div id="cricket-leaderboard" class="space-y-2">
+                            <!-- Rendered by JS -->
+                        </div>
+                        <button class="w-full py-2 border-2 border-dashed border-indigo-300 text-indigo-600 rounded-lg font-medium hover:bg-indigo-50" onclick="toggleModal('modal-add-cricket')">
+                            + Update My Cricket Stats
+                        </button>
+                    </div>
+
+                    <!-- Badminton Section -->
+                    <div id="section-badminton" class="hidden space-y-4">
+                        <h3 class="font-bold text-lg text-red-700">Badminton Players</h3>
+                        <div id="badminton-leaderboard" class="space-y-2">
+                            <!-- Rendered by JS -->
+                        </div>
+                        <button class="w-full py-2 border-2 border-dashed border-red-300 text-red-600 rounded-lg font-medium hover:bg-red-50" onclick="toggleModal('modal-add-badminton')">
+                            + Update My Badminton Stats
+                        </button>
+                    </div>
+                </div>
+
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
                 <!-- Page: Events -->
                 <div id="page-events" class="page space-y-4">
                     <div class="flex justify-between items-center">
@@ -298,7 +357,11 @@
                     </div>
                 </div>
 
+<<<<<<< HEAD
                 <!-- Page: Chat (NEW) -->
+=======
+                <!-- Page: Chat -->
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
                 <div id="page-chat" class="page">
                     <h2 class="text-2xl font-semibold mb-4">Community Chat</h2>
                     
@@ -317,7 +380,11 @@
                     <p class="text-xs text-gray-500 mt-2">Note: This is a simulated multi-user chat. Messages are not persistent beyond this session.</p>
                 </div>
                 
+<<<<<<< HEAD
                 <!-- Page: Profile (New) -->
+=======
+                <!-- Page: Profile -->
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
                 <div id="page-profile" class="page space-y-6">
                     <h2 class="text-2xl font-semibold">My Profile</h2>
                     
@@ -351,7 +418,11 @@
                         </form>
                     </div>
 
+<<<<<<< HEAD
                     <!-- Admin Dashboard (NEW) - Hidden by default -->
+=======
+                    <!-- Admin Dashboard (Hidden by default) -->
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
                     <div id="admin-dashboard" class="bg-red-50 p-6 rounded-xl shadow-md border border-red-300 hidden">
                         <h3 class="text-xl font-bold text-red-700 mb-4 flex items-center">
                             <i data-lucide="shield-check" class="menu-icon w-6 h-6 mr-2"></i> Admin Dashboard
@@ -401,7 +472,11 @@
         </div>
     </div>
     
+<<<<<<< HEAD
     <!-- Login Modal (Phone Number) -->
+=======
+    <!-- Login Modal -->
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
     <div id="modal-login" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-semibold mb-4 text-center">Resident Login</h3>
@@ -429,7 +504,11 @@
         </div>
     </div>
     
+<<<<<<< HEAD
     <!-- Registration Modal (Phone Number) -->
+=======
+    <!-- Registration Modal -->
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
     <div id="modal-register" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-semibold mb-4 text-center">New Resident Registration</h3>
@@ -451,8 +530,66 @@
         </div>
     </div>
 
+<<<<<<< HEAD
 
     <!-- RSVP Modal -->
+=======
+    <!-- Modal: Add Cricket Stats -->
+    <div id="modal-add-cricket" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Update Cricket Stats</h3>
+            <form id="form-add-cricket" class="space-y-3">
+                <select id="c-role" class="w-full border rounded p-2"><option>Batsman</option><option>Bowler</option><option>All-Rounder</option></select>
+                <input type="number" id="c-matches" class="w-full border rounded p-2" placeholder="Matches Played">
+                <input type="number" id="c-runs" class="w-full border rounded p-2" placeholder="Total Runs">
+                <input type="number" id="c-wickets" class="w-full border rounded p-2" placeholder="Total Wickets">
+                <input type="number" id="c-bestScore" class="w-full border rounded p-2" placeholder="Best Score (Runs)">
+                <input type="text" id="c-bestBowling" class="w-full border rounded p-2" placeholder="Best Bowling (e.g., 5/20)">
+                <input type="date" id="c-lastMatch" class="w-full border rounded p-2" placeholder="Last Match Date">
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" class="text-gray-500" onclick="toggleModal('modal-add-cricket')">Cancel</button>
+                    <button type="button" class="bg-indigo-600 text-white px-4 py-2 rounded" onclick="handleAddCricketStats()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Add Badminton Stats -->
+    <div id="modal-add-badminton" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4">Update Badminton Stats</h3>
+            <form id="form-add-badminton" class="space-y-3">
+                <input type="number" id="b-matches" class="w-full border rounded p-2" placeholder="Matches Played">
+                <input type="number" id="b-wins" class="w-full border rounded p-2" placeholder="Wins">
+                <input type="number" id="b-losses" class="w-full border rounded p-2" placeholder="Losses">
+                <input type="date" id="b-lastMatch" class="w-full border rounded p-2" placeholder="Last Match Date">
+                <div class="flex items-center">
+                    <input type="checkbox" id="b-looking" class="mr-2"> <label for="b-looking">Looking for Opponent?</label>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" class="text-gray-500" onclick="toggleModal('modal-add-badminton')">Cancel</button>
+                    <button type="button" class="bg-red-600 text-white px-4 py-2 rounded" onclick="handleAddBadmintonStats()">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: My Stats -->
+    <div id="modal-my-stats" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-xl font-semibold mb-4 text-center">My Sports Profile</h3>
+            <div id="my-stats-content" class="space-y-4 text-sm">
+                <!-- Populated by JS -->
+            </div>
+            <div class="mt-6 text-center">
+                <button class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300" onclick="toggleModal('modal-my-stats')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Other Modals (RSVP, Payment, Pet, etc.) omitted for brevity, assume they exist as per previous file structure -->
+    <!-- Re-adding essential modals for full functionality -->
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
     <div id="modal-rsvp" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-semibold mb-4">RSVP for: <span id="rsvp-event-title" class="font-bold">Event</span></h3>
@@ -497,7 +634,10 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Add Pet Modal -->
+=======
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
     <div id="modal-add-pet" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-semibold mb-4">Add Your Pet</h3>
@@ -514,7 +654,10 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Pet Care Request Modal -->
+=======
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
     <div id="modal-pet-care" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-semibold mb-4">Request a Caretaker</h3>
@@ -530,6 +673,7 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Pet Comment Modal -->
     <div id="modal-pet-comment" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
@@ -555,6 +699,8 @@
     </div>
 
     <!-- Add Media Modal (NEW) -->
+=======
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
     <div id="modal-add-media" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30 hidden p-4">
         <div class="bg-white rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-xl font-semibold mb-4">Upload Media</h3>
@@ -576,6 +722,7 @@
         Message goes here.
     </div>
 
+<<<<<<< HEAD
     <script>
         // --- APPLICATION STATE ---
         const appState = {
@@ -1644,3 +1791,12 @@
     </script>
 </body>
 </html>
+=======
+    <!-- JavaScript Files -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/ui.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
+>>>>>>> 3b4d2b9 (Initial commit: Refactor monolithic HTML into structured project)
